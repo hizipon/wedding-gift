@@ -25,7 +25,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 画面固定用の設定 */
         body.modal-open { 
             overflow: hidden; 
             position: fixed;
@@ -35,7 +34,6 @@
         .serif { font-family: 'Cormorant Garamond', serif; }
         .mincho { font-family: 'Shippori Mincho', serif; }
 
-        /* 認証画面 */
         #authOverlay {
             position: fixed; inset: 0; z-index: 9999;
             background: var(--bg-base);
@@ -80,45 +78,59 @@
         .page-section { flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; padding: 20px; overflow-y: auto; }
         .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 1400px; margin: 0 auto; padding-bottom: 120px; }
 
-        .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; }
-        .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; }
+        .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
+        .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; position: relative; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .info-area { padding: 12px; }
         .cat-badge { font-size: 9px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
         .item-title { font-size: 13px; font-weight: 700; }
 
-        .cart-trigger {
-            position: fixed; bottom: 30px; right: 20px; width: 64px; height: 64px;
-            background: var(--text-main); color: #fff; border-radius: 50%;
+        .fav-icon {
+            position: absolute; z-index: 10;
+            width: 32px; height: 32px; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(4px); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 1500; cursor: pointer;
+            transition: 0.2s;
         }
-        .cart-badge-num {
+        /* 一覧用の位置 */
+        .item-card .fav-icon { top: 10px; right: 10px; }
+        /* モーダル用の位置（右下） */
+        .modal-window .fav-icon { bottom: 20px; right: 20px; width: 40px; height: 40px; }
+
+        .fav-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; transition: 0.2s; }
+        .fav-icon.active svg { fill: #ff4d4d; stroke: #ff4d4d; }
+
+        .float-controls { position: fixed; bottom: 30px; right: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 1500; }
+        .float-btn {
+            width: 60px; height: 60px; background: var(--text-main); color: #fff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); cursor: pointer; position: relative;
+        }
+        .btn-badge {
             position: absolute; top: 0; right: 0; background: var(--accent);
-            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
-            font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
+            font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
         }
 
-        #cartPanel { position: fixed; inset: 0; z-index: 3000; display: none; justify-content: flex-end; }
-        #cartPanel.active { display: flex; }
-        .cart-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-        .cart-content {
+        .side-panel { position: fixed; inset: 0; z-index: 3000; display: none; justify-content: flex-end; }
+        .side-panel.active { display: flex; }
+        .panel-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .panel-content {
             position: relative; width: 85%; max-width: 400px; height: 100%;
             background: #fff; transform: translateX(100%); transition: 0.4s var(--ease-fluid);
             display: flex; flex-direction: column;
         }
-        #cartPanel.active .cart-content { transform: translateX(0); }
-        .cart-header { padding: 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .side-panel.active .panel-content { transform: translateX(0); }
+        .panel-header { padding: 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 
-        /* モーダルの角丸とレイアウトを固定 */
-        #modal { position: fixed; inset: 0; z-index: 4000; display: none; align-items: center; justify-content: center; padding: 15px; }
+        #modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 15px; }
         #modal.active { display: flex; }
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
         .modal-window {
             position: relative; background: #fff; width: 100%; max-width: 500px;
-            max-height: 85vh; border-radius: 30px; overflow: hidden; opacity: 0;
+            max-height: 90vh; border-radius: 30px; overflow: hidden; opacity: 0;
             transform: translateY(20px); transition: 0.4s var(--ease-fluid);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
             display: flex; flex-direction: column;
         }
         #modal.active .modal-window { opacity: 1; transform: translateY(0); }
@@ -168,7 +180,7 @@
             letter-spacing: 0.1em;
         }
 
-        #addToCartBtn.already-in-cart {
+        #addToCartBtn.disabled-btn {
             background-color: #d1d5db;
             color: #9ca3af;
             cursor: not-allowed;
@@ -207,30 +219,54 @@
             <section class="page-section"><div class="card-grid"></div></section>
         </main>
 
-        <div class="cart-trigger" id="cartTrigger">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-            <div class="cart-badge-num" id="cartBadge">0</div>
+        <div class="float-controls">
+            <div class="float-btn" id="favTrigger" style="background: #fff; color: #1a1a1a; border: 1px solid #eee;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                <div class="btn-badge" id="favBadge">0</div>
+            </div>
+            <div class="float-btn" id="cartTrigger">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+                <div class="btn-badge" id="cartBadge">0</div>
+            </div>
         </div>
 
-        <div id="cartPanel">
-            <div class="cart-overlay" id="cartOverlay"></div>
-            <div class="cart-content">
-                <div class="cart-header">
-                    <h2 class="font-bold text-lg">選択リスト</h2>
-                    <div class="cursor-pointer text-2xl px-2" id="closeCart">×</div>
+        <div id="favPanel" class="side-panel">
+            <div class="panel-overlay" onclick="closePanel('favPanel')"></div>
+            <div class="panel-content">
+                <div class="panel-header">
+                    <h2 class="font-bold text-lg">お気に入り</h2>
+                    <div class="cursor-pointer text-2xl px-2" onclick="closePanel('favPanel')">×</div>
                 </div>
-                <div class="cart-items-list flex-grow overflow-y-auto p-4" id="cartItemsList"></div>
+                <div class="flex-grow overflow-y-auto p-4" id="favItemsList"></div>
+            </div>
+        </div>
+
+        <div id="cartPanel" class="side-panel">
+            <div class="panel-overlay" onclick="closePanel('cartPanel')"></div>
+            <div class="panel-content">
+                <div class="panel-header">
+                    <h2 class="font-bold text-lg">選択リスト</h2>
+                    <div class="cursor-pointer text-2xl px-2" onclick="closePanel('cartPanel')">×</div>
+                </div>
+                <div class="flex-grow overflow-y-auto p-4" id="cartItemsList"></div>
                 <div id="orderError" class="text-red-500 text-[10px] text-center px-4 hidden">※お一人様1点までお選びいただけます。</div>
                 <div class="btn-order" id="orderBtn">注文フォームへ進む</div>
             </div>
         </div>
 
         <div id="modal">
-            <div class="modal-overlay" id="modalOverlay"></div>
+            <div class="modal-overlay" onclick="closeModal()"></div>
             <div class="modal-window">
-                <div id="modalClose" class="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-10 text-xl font-bold shadow-sm">×</div>
+                <!-- 閉じるボタンは右上のまま -->
+                <div onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-10 text-xl font-bold shadow-sm">×</div>
                 <div class="modal-scroll-area">
-                    <img id="modalImg" src="" class="w-full aspect-square object-cover">
+                    <div class="relative">
+                        <img id="modalImg" src="" class="w-full aspect-square object-cover">
+                        <!-- お気に入りボタンを右下へ移動 -->
+                        <div class="fav-icon" id="modalFavBtn">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                        </div>
+                    </div>
                     <div class="p-6">
                         <div id="modalBadge" class="cat-badge"></div>
                         <h2 id="modalTitle" class="text-xl font-bold"></h2>
@@ -242,7 +278,7 @@
                             <div class="mt-3 text-right text-[10px] text-stone-400">— From Us</div>
                         </div>
 
-                        <button class="w-full bg-black text-white p-4 mt-8 mb-4 rounded-xl font-bold transition-colors" id="addToCartBtn">このギフトを選択する</button>
+                        <button class="w-full bg-black text-white p-4 mt-8 mb-6 rounded-xl font-bold transition-colors" id="addToCartBtn">このギフトを選択する</button>
                     </div>
                 </div>
             </div>
@@ -257,20 +293,16 @@
         };
 
         const giftData = [
-            { 
-                id: 1, cat: 1, label: 'GOURMET', 
-                title: '朝摘み有機のドリップ珈琲', 
-                desc: '朝一番の新鮮な香りを閉じ込めたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', 
-                recommend: '私たちが毎朝飲んでいるお気に入りのコーヒーです。封を開けた時の香りが最高なので、ぜひゆっくりした時間に楽しんでほしいです！',
-                img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' 
-            },
-            { 
-                id: 2, cat: 2, label: 'LIVING', 
-                title: '今治産オーガニックタオル', 
-                desc: '使うほどに肌に馴染む、極上の柔らかさ。綿本来の良さを引き出した逸品。', 
-                recommend: '実際に使ってみて、そのふわふわ感に本当に感動しました。毎日使うものだからこそ、ちょっと良いものを選んでもらえたら嬉しいです。',
-                img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800' 
-            }
+            { id: 1, cat: 1, label: 'GOURMET', title: '朝摘み有機ドリップ珈琲', desc: '朝一番の新鮮な香りを閉じ込めたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', recommend: '私たちが毎朝飲んでいるお気に入りのコーヒーです！', img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' },
+            { id: 3, cat: 1, label: 'GOURMET', title: '特選和牛のローストビーフ', desc: 'じっくりと低温調理で仕上げた、口の中でとろける贅沢な味わい。', recommend: 'お祝いの席で食べて感動した味です。メインディッシュにぜひ。', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800' },
+            { id: 4, cat: 1, label: 'GOURMET', title: 'プレミアム フルーツコンポート', desc: '厳選された旬の果実を、上品な甘さのシロップで煮込みました。', recommend: '見た目も華やかで、デザートタイムが楽しみになります。', img: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=800' },
+            { id: 5, cat: 1, label: 'GOURMET', title: 'クラフトビール詰め合わせ', desc: '日本各地の小規模醸造所から届いた、個性豊かなビールのセット。', recommend: 'ビール好きの友人から教えてもらった絶品揃いです。', img: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800' },
+            { id: 6, cat: 1, label: 'GOURMET', title: '宇治抹茶の濃厚テリーヌ', desc: '最高級の宇治抹茶を贅沢に使用。ねっとりと濃厚な食感が魅力。', recommend: '和菓子が苦手な人でもハマる、至福のスイーツです。', img: 'https://images.unsplash.com/photo-1515037028865-0a2a82603f7c?w=800' },
+            { id: 2, cat: 2, label: 'LIVING', title: '今治産オーガニックタオル', desc: '使うほどに肌に馴染む、極上の柔らかさ。綿本来の良さを引き出した逸品。', recommend: '実際に使ってみて、そのふわふわ感に本当に感動しました。', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800' },
+            { id: 7, cat: 2, label: 'LIVING', title: 'アロマディフューザー・ウッド', desc: '木のぬくもりを感じるデザイン。心地よい香りで空間を癒します。', recommend: 'リビングに置くだけで、リラックスした空間に変わります。', img: 'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=800' },
+            { id: 8, cat: 2, label: 'LIVING', title: 'ハンドメイド 陶器ペアマグ', desc: '職人が一つひとつ丁寧に焼き上げた、世界にひとつだけの表情。', recommend: '二人で過ごすコーヒータイムに使ってほしくて選びました。', img: 'https://images.unsplash.com/photo-1577937927133-66ef06ac992a?w=800' },
+            { id: 9, cat: 2, label: 'LIVING', title: 'リネン素材のピローケース', desc: '吸湿性と放湿性に優れたリネン100%。上質な眠りをサポート。', recommend: '夏の暑い夜でもさらっとしていて、本当に快適です。', img: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800' },
+            { id: 10, cat: 2, label: 'LIVING', title: '北欧風 真鍮のキャンドルスタンド', desc: 'シンプルながらも存在感を放つ真鍮製。時間の経過とともに風合いが増します。', recommend: 'インテリアのアクセントとして、長く楽しんでいただけるはず。', img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800' }
         ];
 
         function checkPass() {
@@ -286,6 +318,7 @@
         }
 
         let cart = [];
+        let favorites = [];
         let currentItem = null;
 
         function build() {
@@ -294,10 +327,20 @@
             giftData.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'item-card';
-                card.innerHTML = `<div class="img-container"><img src="${item.img}"></div><div class="info-area"><div class="cat-badge">${item.label}</div><h3 class="item-title">${item.title}</h3></div>`;
-                card.onclick = () => openModal(item);
-                grids[0].appendChild(card.cloneNode(true)).onclick = () => openModal(item);
-                if (grids[item.cat]) grids[item.cat].appendChild(card).onclick = () => openModal(item);
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${item.img}" onclick="openModalById(${item.id})">
+                        <div class="fav-icon ${favorites.some(f => f.id === item.id) ? 'active' : ''}" onclick="toggleFav(event, ${item.id})">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                        </div>
+                    </div>
+                    <div class="info-area" onclick="openModalById(${item.id})">
+                        <div class="cat-badge">${item.label}</div>
+                        <h3 class="item-title">${item.title}</h3>
+                    </div>
+                `;
+                grids[0].appendChild(card.cloneNode(true));
+                if (grids[item.cat]) grids[item.cat].appendChild(card);
             });
             updateIndicator();
         }
@@ -318,12 +361,23 @@
             }
 
             const addBtn = document.getElementById('addToCartBtn');
-            if (cart.find(i => i.id === item.id)) {
-                addBtn.innerText = "選択済みです";
-                addBtn.classList.add('already-in-cart');
+            const favIcon = document.getElementById('modalFavBtn');
+            
+            favIcon.onclick = (e) => toggleFav(e, item.id);
+            if(favorites.some(f => f.id === item.id)) favIcon.classList.add('active');
+            else favIcon.classList.remove('active');
+
+            if (cart.length > 0) {
+                if (cart.some(i => i.id === item.id)) {
+                    addBtn.innerText = "選択済みです";
+                    addBtn.classList.add('disabled-btn');
+                } else {
+                    addBtn.innerText = "他を選択中です";
+                    addBtn.classList.add('disabled-btn');
+                }
             } else {
                 addBtn.innerText = "このギフトを選択する";
-                addBtn.classList.remove('already-in-cart');
+                addBtn.classList.remove('disabled-btn');
             }
 
             const modal = document.getElementById('modal');
@@ -340,10 +394,26 @@
         }
 
         function addToCart() {
-            if (currentItem && !cart.find(i => i.id === currentItem.id)) {
+            if (cart.length === 0 && currentItem) {
                 cart.push(currentItem);
                 updateCartUI();
                 closeModal();
+            }
+        }
+
+        function toggleFav(e, id) {
+            e.stopPropagation();
+            const item = giftData.find(i => i.id === id);
+            const idx = favorites.findIndex(f => f.id === id);
+            if(idx > -1) favorites.splice(idx, 1);
+            else favorites.push(item);
+            
+            updateFavUI();
+            build();
+            
+            if(currentItem && currentItem.id === id) {
+                const modalFav = document.getElementById('modalFavBtn');
+                if(modalFav) modalFav.classList.toggle('active', idx === -1);
             }
         }
 
@@ -358,21 +428,32 @@
                     <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover" onclick="openModalById(${item.id})">
                     <div class="flex-grow" onclick="openModalById(${item.id})">
                         <div class="text-xs font-bold">${item.title}</div>
-                        <div class="text-[10px] text-stone-400">詳細を見る</div>
                     </div>
                     <div class="text-[10px] text-red-300 px-2" onclick="removeFromCart(event, ${item.id})">削除</div>
                 `;
                 list.appendChild(div);
             });
             const orderBtn = document.getElementById('orderBtn');
-            const err = document.getElementById('orderError');
-            if(cart.length === 1) {
-                orderBtn.classList.remove('disabled');
-                err.classList.add('hidden');
-            } else {
-                orderBtn.classList.add('disabled');
-                if(cart.length > 1) err.classList.remove('hidden');
-            }
+            if(cart.length === 1) orderBtn.classList.remove('disabled');
+            else orderBtn.classList.add('disabled');
+        }
+
+        function updateFavUI() {
+            const list = document.getElementById('favItemsList');
+            document.getElementById('favBadge').innerText = favorites.length;
+            list.innerHTML = '';
+            favorites.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer';
+                div.innerHTML = `
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover" onclick="openModalById(${item.id})">
+                    <div class="flex-grow" onclick="openModalById(${item.id})">
+                        <div class="text-xs font-bold">${item.title}</div>
+                    </div>
+                    <div class="text-[10px] text-stone-400 px-2" onclick="toggleFav(event, ${item.id})">解除</div>
+                `;
+                list.appendChild(div);
+            });
         }
 
         window.openModalById = (id) => {
@@ -386,8 +467,13 @@
             updateCartUI();
         };
 
+        function closePanel(id) {
+            const p = document.getElementById(id);
+            p.classList.remove('active');
+            setTimeout(() => p.style.display = 'none', 400);
+        }
+
         document.getElementById('orderBtn').onclick = (e) => {
-            e.preventDefault();
             if (cart.length !== 1) return;
             const finalUrl = `${CONFIG.formUrl}?usp=pp_url&${CONFIG.itemNameFieldId}=${encodeURIComponent(cart[0].title)}`;
             window.open(finalUrl, '_blank');
@@ -423,13 +509,12 @@
             p.style.display = 'flex';
             setTimeout(() => p.classList.add('active'), 10);
         };
-        document.getElementById('closeCart').onclick = () => {
-            const p = document.getElementById('cartPanel');
-            p.classList.remove('active');
-            setTimeout(() => p.style.display = 'none', 400);
+        document.getElementById('favTrigger').onclick = () => {
+            const p = document.getElementById('favPanel');
+            p.style.display = 'flex';
+            setTimeout(() => p.classList.add('active'), 10);
         };
-        document.getElementById('modalClose').onclick = closeModal;
-        document.getElementById('modalOverlay').onclick = closeModal;
+
         document.getElementById('addToCartBtn').onclick = addToCart;
     </script>
 </body>
