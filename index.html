@@ -1,434 +1,465 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>THE GIFT | Wedding Selection</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-base: #f9f9f7;
-            --text-main: #1a1a1a;
-            --accent: #b08d57;
-            --warm-text: #8d6e63;
-            --white: #ffffff;
-            --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);
-        }
+gap: 12px; 
+max-width: 1400px; 
+margin: 0 auto; 
+            padding-bottom: 400px; /* 圧倒的な余白（画面半分近く）を確保 */
+            padding-bottom: 400px; 
+}
 
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            font-family: 'Noto Sans JP', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+.item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
+@@ -94,17 +94,18 @@
+.item-title { font-size: 13px; font-weight: 700; }
 
-        .serif { font-family: 'Cormorant Garamond', serif; }
-        .mincho { font-family: 'Shippori Mincho', serif; }
-
-        /* Auth Screen Styling */
-        #authOverlay {
-            position: fixed; inset: 0; z-index: 9999;
-            background: var(--bg-base);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; text-align: center;
-            transition: opacity 0.8s var(--ease-fluid), transform 0.8s var(--ease-fluid);
-        }
-        
-        .auth-bg-decor {
-            position: absolute; inset: 0; overflow: hidden; z-index: -1; pointer-events: none;
-        }
-        .shape {
-            position: absolute;
-            background: radial-gradient(circle, rgba(176,141,87,0.08) 0%, rgba(249,249,247,0) 70%);
+.fav-icon {
+            position: absolute; z-index: 10;
+            width: 32px; height: 32px; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(4px); border-radius: 50%;
+            width: 32px; height: 32px; background: #f5f5f5;
             border-radius: 50%;
-            filter: blur(40px);
-            animation: float 20s infinite alternate ease-in-out;
-        }
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(10%, 15%) scale(1.2); }
-        }
+display: flex; align-items: center; justify-content: center;
+transition: 0.2s;
+            flex-shrink: 0;
+}
+        .item-card .fav-icon { top: 10px; right: 10px; }
+        .modal-window .fav-icon { bottom: 15px; right: 15px; width: 40px; height: 40px; }
+        .item-card .fav-icon { position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); }
+        .modal-fav-btn { width: 52px; height: 52px; border-radius: 12px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; }
 
-        .auth-card {
-            background: var(--white); padding: 40px 30px; border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 100%; max-width: 360px;
-            z-index: 10;
-            transition: all 0.6s var(--ease-fluid);
-        }
-        .auth-input {
-            width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px;
-            margin: 20px 0 10px; text-align: center; letter-spacing: 0.3em; font-size: 20px;
-            outline: none; transition: border-color 0.3s;
-        }
-        .auth-btn {
-            width: 100%; padding: 16px; background: var(--text-main);
-            color: #fff; border-radius: 12px; font-weight: 700; cursor: pointer;
-            transition: transform 0.2s;
-        }
+        .fav-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; transition: 0.2s; }
+        .fav-icon.active svg { fill: #ff4d4d; stroke: #ff4d4d; }
+        .fav-icon svg, .modal-fav-btn svg { width: 18px; height: 18px; fill: none; stroke: #888; stroke-width: 2; transition: 0.2s; }
+        .fav-icon.active svg, .modal-fav-btn.active svg { fill: #ff4d4d; stroke: #ff4d4d; }
+        .modal-fav-btn.active { background: #fff1f1; }
 
-        #appContent { 
-            display: none; 
-            opacity: 0;
-            transform: scale(1.02);
-            transition: opacity 0.8s var(--ease-fluid), transform 0.8s var(--ease-fluid);
-        }
-        #appContent.visible {
-            display: block;
-            opacity: 1;
-            transform: scale(1);
-        }
+.float-controls { 
+position: fixed; 
+@@ -162,60 +163,46 @@
+.btn-order.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 
-        /* Header Optimization */
-        header {
-            position: fixed; top: 0; left: 0; width: 100%; 
-            height: 70px; /* Fixed height */
-            background: rgba(255, 255, 255, 0.98); z-index: 1000;
-            display: flex; align-items: center; border-bottom: 1px solid #eee;
-            padding-top: env(safe-area-inset-top);
+.recommend-box {
+            background: #fffcf9;
+            border-left: 3px solid var(--accent);
+            padding: 20px 24px;
+            border-radius: 0 16px 16px 0;
+            margin-top: 24px;
+            position: relative;
+            background: #fffcf9; border-left: 3px solid var(--accent); padding: 20px 24px;
+            border-radius: 0 16px 16px 0; margin-top: 24px; position: relative;
+box-shadow: 2px 2px 10px rgba(176, 141, 87, 0.05);
+}
+.recommend-box::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+background-image: radial-gradient(#e0d6c5 0.5px, transparent 0.5px);
+            background-size: 10px 10px;
+            opacity: 0.2;
+            pointer-events: none;
         }
-        .header-inner {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; max-width: 1400px; margin: 0 auto; width: 100%;
-        }
-        .nav-tabs { display: flex; gap: 15px; position: relative; }
-        .nav-tabs span { font-size: 11px; font-weight: 700; color: #888; cursor: pointer; padding: 10px 0; }
-        .nav-tabs span.active { color: var(--text-main); }
-        .nav-indicator { position: absolute; bottom: 0; height: 3px; background: var(--text-main); transition: 0.4s var(--ease-fluid); }
+        #modalRecommend {
+            color: var(--warm-text);
+            line-height: 1.8;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+            background-size: 10px 10px; opacity: 0.2; pointer-events: none;
+}
+        #modalRecommend { color: var(--warm-text); line-height: 1.8; letter-spacing: 0.02em; font-weight: 500; }
+.recommend-label {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.1em;
+            display: inline-block; background: var(--accent); color: white; font-size: 10px;
+            font-weight: 800; padding: 3px 10px; border-radius: 4px; text-transform: uppercase;
+            margin-bottom: 12px; letter-spacing: 0.1em;
+}
 
-        .main-scroller {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-            height: 100vh;
-            margin-top: 0;
-            scrollbar-width: none;
-        }
-        .main-scroller::-webkit-scrollbar { display: none; }
-        .page-section { 
-            flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; 
-            padding: 90px 20px 20px; /* Top padding to clear header */
-            overflow-y: auto; 
-        }
-        
-        .card-grid { 
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; 
-            max-width: 1400px; margin: 0 auto; padding-bottom: 120px; 
-        }
+#addToCartBtn.disabled-btn {
+            background-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            pointer-events: none;
+            background-color: #d1d5db; color: #9ca3af; cursor: not-allowed; pointer-events: none;
+}
 
-        .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
-        .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; position: relative; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .info-area { padding: 12px; }
-        .cat-badge { font-size: 9px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
-        .item-title { font-size: 13px; font-weight: 700; }
+        #modalImgContainer {
+            width: 100%;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            position: relative;
+            background: #f3f3f3;
+        }
+        #modalImgContainer { width: 100%; aspect-ratio: 1/1; overflow: hidden; position: relative; background: #f3f3f3; }
 
-        .float-controls { 
-            position: fixed; 
-            bottom: calc(30px + env(safe-area-inset-bottom)); 
-            right: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            z-index: 1500; 
-        }
-        .float-btn {
-            width: 56px; height: 56px; background: var(--text-main); color: #fff;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15); cursor: pointer; position: relative;
-        }
-        .btn-badge {
-            position: absolute; top: -2px; right: -2px; background: var(--accent);
-            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff;
-            font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-        }
+        .list-item-btn {
+            flex-shrink: 0;
+            white-space: nowrap;
+        .product-info-table { width: 100%; font-size: 11px; color: #666; margin-top: 20px; border-top: 1px solid #eee; }
+        .product-info-table th { text-align: left; padding: 10px 5px; border-bottom: 1px solid #eee; width: 80px; vertical-align: top; font-weight: 600; color: #333; }
+        .product-info-table td { padding: 10px 5px; border-bottom: 1px solid #eee; vertical-align: top; line-height: 1.5; }
 
-        /* Modal Styles */
-        #modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        #modal.active { display: flex; }
-        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
-        .modal-window {
-            position: relative; background: #fff; width: 100%; max-width: 460px;
-            max-height: 85dvh; border-radius: 24px; overflow: hidden; opacity: 0;
-            transform: translateY(20px); transition: 0.4s var(--ease-fluid);
-            display: flex; flex-direction: column;
-        }
-        #modal.active .modal-window { opacity: 1; transform: translateY(0); }
-        .modal-scroll-area { overflow-y: auto; flex-grow: 1; }
+        /* --- Drag & Drop logic for fixed labels --- */
+        .cart-slot { position: relative; margin-bottom: 24px; min-height: 74px; }
+        .rank-label-fixed { font-size: 10px; font-weight: 800; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+        .rank-label-fixed::after { content: ""; flex-grow: 1; height: 1px; background: #eee; }
 
-        /* Detail Action Bar */
-        .detail-action-bar {
-            padding: 16px 20px;
-            padding-bottom: calc(16px + env(safe-area-inset-bottom));
-            border-top: 1px solid #f0f0f0;
-            display: flex; gap: 10px;
-            background: #fff;
+        .cart-item-wrapper {
+            cursor: grab; user-select: none; touch-action: none; position: relative; z-index: 1;
         }
-        .btn-fav-detail {
-            width: 54px; height: 54px; border: 1.5px solid #eee; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center; color: #1a1a1a;
-            transition: all 0.2s; flex-shrink: 0;
+        .cart-item-wrapper:active { cursor: grabbing; }
+        .cart-item-wrapper.dragging {
+            opacity: 0.95; z-index: 50; box-shadow: 0 15px 35px rgba(0,0,0,0.15); transition: none !important;
         }
-        .btn-fav-detail.active { background: #fff1f1; border-color: #ffcccc; color: #ff4d4d; }
-        .btn-add-cart {
-            flex-grow: 1; height: 54px; background: var(--text-main); color: #fff;
-            border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 14px;
-        }
-
-        /* Side Panel */
-        .side-panel { position: fixed; inset: 0; z-index: 3000; display: none; justify-content: flex-end; }
-        .side-panel.active { display: flex; }
-        .panel-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-        .panel-content {
-            position: relative; width: 85%; max-width: 400px; height: 100%;
-            background: #fff; transform: translateX(100%); transition: 0.4s var(--ease-fluid);
-            display: flex; flex-direction: column;
-        }
-        .side-panel.active .panel-content { transform: translateX(0); }
-    </style>
+        .cart-item-wrapper.animating {
+            transition: transform 0.4s var(--ease-fluid);
+}
+</style>
 </head>
-<body>
-
-    <div id="authOverlay">
-        <div class="auth-bg-decor">
-            <div class="shape" style="width: 400px; height: 400px; top: -100px; left: -100px;"></div>
-            <div class="shape" style="width: 300px; height: 300px; bottom: 10%; right: -50px; animation-delay: -5s;"></div>
-            <div class="shape" style="width: 250px; height: 250px; top: 40%; left: 50%; animation-delay: -10s;"></div>
-        </div>
-        <div class="auth-card" id="authCard">
-            <h1 class="serif text-2xl mb-2 tracking-widest">THE GIFT</h1>
-            <p class="text-stone-400 text-xs mb-6">パスコードを入力してください</p>
-            <input type="tel" id="passInput" class="auth-input" placeholder="0000" maxlength="4">
-            <div id="authError" class="text-red-500 text-[10px] mt-2 hidden">パスコードが正しくありません</div>
-            <button onclick="checkPass()" class="auth-btn mt-6">カタログを見る</button>
-        </div>
-    </div>
-
-    <div id="appContent">
-        <header>
-            <div class="header-inner">
-                <div class="serif text-xl font-bold tracking-tighter">THE GIFT</div>
-                <nav class="nav-tabs">
-                    <span class="active" data-idx="0">すべて</span>
-                    <span data-idx="1">グルメ</span>
-                    <span data-idx="2">雑貨</span>
-                    <div class="nav-indicator" id="navIndicator"></div>
-                </nav>
-            </div>
-        </header>
-
-        <main class="main-scroller" id="mainScroller">
-            <section class="page-section"><div class="card-grid" id="grid-0"></div></section>
-            <section class="page-section"><div class="card-grid" id="grid-1"></div></section>
-            <section class="page-section"><div class="card-grid" id="grid-2"></div></section>
-        </main>
-
-        <div class="float-controls">
-            <div class="float-btn" id="favTrigger" style="background: #fff; color: #1a1a1a; border: 1px solid #eee;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                <div class="btn-badge" id="favBadge">0</div>
-            </div>
-            <div class="float-btn" id="cartTrigger">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-                <div class="btn-badge" id="cartBadge">0</div>
-            </div>
-        </div>
-
-        <!-- Detail Modal -->
-        <div id="modal">
-            <div class="modal-overlay" onclick="closeModal()"></div>
-            <div class="modal-window">
-                <div onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-20 shadow-sm text-lg">✕</div>
-                <div class="modal-scroll-area">
-                    <img id="modalImg" src="" class="w-full aspect-square object-cover">
-                    <div class="p-6">
-                        <div id="modalBadge" class="cat-badge"></div>
-                        <h2 id="modalTitle" class="text-xl font-bold leading-tight"></h2>
-                        <p id="modalDesc" class="mt-4 text-stone-600 text-[14px] leading-relaxed"></p>
-                    </div>
-                </div>
-                <!-- Requested Detail Bar -->
-                <div class="detail-action-bar">
-                    <div class="btn-fav-detail" id="modalFavBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    </div>
-                    <button class="btn-add-cart" id="addToCartBtn">このギフトを選択する</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Panels -->
-        <div id="cartPanel" class="side-panel">
-            <div class="panel-overlay" onclick="closePanel('cartPanel')"></div>
-            <div class="panel-content">
-                <div class="p-6 border-b border-stone-100 flex justify-between items-end">
+@@ -276,11 +263,14 @@ <h2 class="font-bold text-lg">お気に入り</h2>
+<div class="panel-overlay" onclick="closePanel('cartPanel')"></div>
+<div class="panel-content">
+<div class="panel-header">
                     <h2 class="font-bold text-lg">選択リスト</h2>
-                    <div class="cursor-pointer text-xl" onclick="closePanel('cartPanel')">✕</div>
-                </div>
-                <div class="flex-grow overflow-y-auto p-4" id="cartItemsList"></div>
-            </div>
-        </div>
+                    <div class="flex flex-col">
+                        <h2 class="font-bold text-lg">選択リスト</h2>
+                        <span class="text-[9px] text-stone-400">商品を掴んで希望順位を入れ替えられます</span>
+                    </div>
+<div class="cursor-pointer text-2xl px-2" onclick="closePanel('cartPanel')">×</div>
+</div>
+<div class="flex-grow overflow-y-auto p-4" id="cartItemsList"></div>
+                <div id="orderError" class="text-red-500 text-[10px] text-center px-4 hidden">※お一人様1点までお選びいただけます。</div>
+                <div id="orderError" class="text-red-500 text-[10px] text-center px-4 hidden">※お一人様3点までお選びいただけます。</div>
+<div class="btn-order" id="orderBtn">注文フォームへ進む</div>
+</div>
+</div>
+@@ -289,12 +279,9 @@ <h2 class="font-bold text-lg">選択リスト</h2>
+<div class="modal-overlay" onclick="closeModal()"></div>
+<div class="modal-window">
+<div onclick="closeModal()" class="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-20 text-xl font-bold shadow-md">×</div>
+                <div class="modal-scroll-area">
+                <div class="modal-scroll-area" id="modalScrollArea">
+<div id="modalImgContainer">
+<img id="modalImg" src="" class="w-full h-full object-cover">
+                        <div class="fav-icon" id="modalFavBtn">
+                            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                        </div>
+</div>
+<div class="p-5">
+<div id="modalBadge" class="cat-badge"></div>
+@@ -307,7 +294,14 @@ <h2 id="modalTitle" class="text-lg font-bold"></h2>
+<div class="mt-2 text-right text-[9px] text-stone-400">— From Us</div>
+</div>
 
-        <div id="favPanel" class="side-panel">
-            <div class="panel-overlay" onclick="closePanel('favPanel')"></div>
-            <div class="panel-content">
-                <div class="p-6 border-b border-stone-100 flex justify-between items-end">
-                    <h2 class="font-bold text-lg">お気に入り</h2>
-                    <div class="cursor-pointer text-xl" onclick="closePanel('favPanel')">✕</div>
-                </div>
-                <div class="flex-grow overflow-y-auto p-4" id="favItemsList"></div>
-            </div>
-        </div>
-    </div>
+                        <button class="w-full bg-black text-white p-4 mt-6 mb-4 rounded-xl font-bold transition-colors text-sm" id="addToCartBtn">このギフトを選択する</button>
+                        <div id="modalInfoArea" class="mt-4"></div>
 
-    <script>
-        const giftData = [
-            { id: 1, cat: 1, label: 'GOURMET', title: '朝摘み有機ドリップ珈琲', desc: '朝一番の新鮮な香りを閉じ込めたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' },
-            { id: 2, cat: 2, label: 'LIVING', title: '今治産オーガニックタオル', desc: '使うほどに肌に馴染む、極上の柔らかさ。綿本来の良さを引き出した逸品。', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800' },
-            { id: 3, cat: 1, label: 'GOURMET', title: '特選和牛のローストビーフ', desc: 'じっくりと低温調理で仕上げた、口の中でとろける贅沢な味わい。', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800' },
-            { id: 4, cat: 1, label: 'GOURMET', title: 'ふらの牛乳プリン(6本入)', desc: '新鮮な牛乳を贅沢に使用。口の中で優しくとろけるプリンです。', img: 'https://images.unsplash.com/photo-1581441712213-9118534062f6?w=800' },
-            { id: 5, cat: 2, label: 'LIVING', title: '錫製タンブラー ペアセット', desc: '職人が一つひとつ丁寧に磨き上げた、冷たさが持続する錫製タンブラー。', img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800' }
-        ];
+                        <div class="flex items-center gap-3 mt-6 mb-4">
+                            <button class="flex-grow bg-black text-white p-4 rounded-xl font-bold transition-colors text-sm" id="addToCartBtn">このギフトを選択する</button>
+                            <div class="modal-fav-btn" id="modalFavBtn">
+                                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                            </div>
+                        </div>
+</div>
+</div>
+</div>
+@@ -318,11 +312,22 @@ <h2 id="modalTitle" class="text-lg font-bold"></h2>
+const CONFIG = {
+password: "2024",
+formUrl: "https://docs.google.com/forms/d/e/1FAIpQLScBGUbrytDAVbQakEl9nh7Le3hJ1jPHgCDV7t83p2dFHltaPw/viewform",
+            itemNameFieldId: "entry.1962469833"
+            itemNameFieldId: "entry.1962469833",
+            maxCart: 3
+};
 
-        let cart = [];
-        let favorites = [];
+const giftData = [
+            { id: 1, cat: 1, label: 'GOURMET', title: '朝摘み有機ドリップ珈琲', desc: '朝一番の新鮮な香りを閉じ込めたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', recommend: '私たちが毎朝飲んでいるお気に入りのコーヒーです！', img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' },
+            { id: 11, cat: 1, label: 'GOURMET', title: 'ふらの牛乳プリン(6本入)', desc: '新鮮な「ふらの牛乳」を贅沢に使用。口の中で優しくとろける、素材の味を最大限に活かした究極のプリンです。', recommend: '地元の大好きなケーキ屋さんのプリンです！', img: 'https://images.unsplash.com/photo-1581441712213-9118534062f6?q=80&w=1000', info: {
+                "内容量": "（牛乳瓶 90ml）×6本",
+                "原材料表示": "ふらの牛乳、卵、砂糖、バニラペースト",
+                "アレルギー表示": "卵・乳",
+                "保存方法": "要冷蔵（10℃以下で保存）",
+                "賞味期限": "商品発送日を含めて5日（北海道内=到着日を含めて4日、北海道外=到着日を含めて3日）",
+                "お届け": "冷蔵発送",
+                "成分表示": "1本(標準90gあたり）熱量 166.5kcal　タンパク質 4.9g　脂質 8g　炭水化物 18g　食塩相当量 0.1",
+                "サイズ(外箱)": "高さ約11cm × 幅約16cm × 奥行き約11cm"
+            }},
+            { id: 1, cat: 1, label: 'GOURMET', title: '朝摘み有機ドリップ珈琲', desc: '朝一番の新鮮な香りを閉じめたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', recommend: '私たちが毎朝飲んでいるお気に入りのコーヒーです！', img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' },
+{ id: 3, cat: 1, label: 'GOURMET', title: '特選和牛のローストビーフ', desc: 'じっくりと低温調理で仕上げた、口の中でとろける贅沢な味わい。', recommend: 'お祝いの席で食べて感動した味です。メインディッシュにぜひ。', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800' },
+{ id: 4, cat: 1, label: 'GOURMET', title: 'プレミアム フルーツコンポート', desc: '厳選された旬の果実を、上品な甘さのシロップで煮込みました。', recommend: '見た目も華やかで、デザートタイムが楽しみになります。', img: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=800' },
+{ id: 5, cat: 1, label: 'GOURMET', title: 'クラフトビール詰め合わせ', desc: '日本各地の小規模醸造所から届いた、個性豊かなビールのセット。', recommend: 'ビール好きの友人から教えてもらった絶品揃いです。', img: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800' },
+@@ -354,12 +359,13 @@ <h2 id="modalTitle" class="text-lg font-bold"></h2>
+const grids = document.querySelectorAll('.card-grid');
+grids.forEach(g => g.innerHTML = '');
+giftData.forEach(item => {
+                const isFav = favorites.some(f => f.id === item.id);
+const card = document.createElement('div');
+card.className = 'item-card';
+card.innerHTML = `
+                   <div class="img-container">
+                       <img src="${item.img}" onclick="openModalById(${item.id})">
+                        <div class="fav-icon ${favorites.some(f => f.id === item.id) ? 'active' : ''}" onclick="toggleFav(event, ${item.id})">
+                        <div class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFav(event, ${item.id})">
+                           <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                       </div>
+                   </div>
+@@ -376,6 +382,11 @@ <h3 class="item-title">${item.title}</h3>
 
-        function checkPass() {
-            const input = document.getElementById('passInput').value;
-            if(input === "2024") {
-                const overlay = document.getElementById('authOverlay');
-                const card = document.getElementById('authCard');
-                const app = document.getElementById('appContent');
-                
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(-20px) scale(0.95)';
-                overlay.style.opacity = '0';
-                overlay.style.pointerEvents = 'none';
+function openModal(item) {
+currentItem = item;
+            
+            // 必ず一番上から表示する
+            const scrollArea = document.getElementById('modalScrollArea');
+            scrollArea.scrollTop = 0;
 
-                app.style.display = 'block';
-                build();
-                
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    app.classList.add('visible');
-                    updateIndicator();
-                }, 400);
-            } else {
-                document.getElementById('authError').classList.remove('hidden');
+document.getElementById('modalImg').src = item.img;
+document.getElementById('modalBadge').innerText = item.label;
+document.getElementById('modalTitle').innerText = item.title;
+@@ -389,21 +400,30 @@ <h3 class="item-title">${item.title}</h3>
+recSection.classList.add('hidden');
+}
+
+            const infoArea = document.getElementById('modalInfoArea');
+            infoArea.innerHTML = '';
+            if(item.info) {
+                let tableHtml = '<table class="product-info-table">';
+                for(let key in item.info) {
+                    tableHtml += `<tr><th>${key}</th><td>${item.info[key]}</td></tr>`;
+                }
+                tableHtml += '</table>';
+                infoArea.innerHTML = tableHtml;
             }
+
+const addBtn = document.getElementById('addToCartBtn');
+const favIcon = document.getElementById('modalFavBtn');
+
+favIcon.onclick = (e) => toggleFav(e, item.id);
+if(favorites.some(f => f.id === item.id)) favIcon.classList.add('active');
+else favIcon.classList.remove('active');
+
+            if (cart.length > 0) {
+                if (cart.some(i => i.id === item.id)) {
+                    addBtn.innerText = "選択済みです";
+                    addBtn.classList.add('disabled-btn');
+                } else {
+                    addBtn.innerText = "他を選択中です";
+                    addBtn.classList.add('disabled-btn');
+                }
+            if (cart.some(i => i.id === item.id)) {
+                addBtn.innerText = "選択済みです";
+                addBtn.classList.add('disabled-btn');
+            } else if (cart.length >= CONFIG.maxCart) {
+                addBtn.innerText = `最大${CONFIG.maxCart}点までです`;
+                addBtn.classList.add('disabled-btn');
+} else {
+addBtn.innerText = "このギフトを選択する";
+addBtn.classList.remove('disabled-btn');
+@@ -423,7 +443,7 @@ <h3 class="item-title">${item.title}</h3>
+}
+
+function addToCart() {
+            if (cart.length === 0 && currentItem) {
+            if (cart.length < CONFIG.maxCart && currentItem && !cart.some(i => i.id === currentItem.id)) {
+cart.push(currentItem);
+updateCartUI();
+closeModal();
+@@ -450,36 +470,150 @@ <h3 class="item-title">${item.title}</h3>
+const list = document.getElementById('cartItemsList');
+document.getElementById('cartBadge').innerText = cart.length;
+list.innerHTML = '';
+            cart.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer';
+                div.innerHTML = `
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" onclick="openModalById(${item.id})">
+                    <div class="flex-grow min-w-0" onclick="openModalById(${item.id})">
+                        <div class="text-xs font-bold truncate">${item.title}</div>
+            
+            const labels = ["第1希望", "第2希望", "第3希望"];
+
+            for(let i = 0; i < cart.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'cart-slot';
+                slot.innerHTML = `<div class="rank-label-fixed">${labels[i]}</div>`;
+                
+                const item = cart[i];
+                const wrapper = document.createElement('div');
+                wrapper.className = 'cart-item-wrapper';
+                wrapper.dataset.index = i;
+                wrapper.dataset.id = item.id;
+                
+                wrapper.innerHTML = `
+                    <div class="flex items-center gap-4 bg-stone-50 p-3 rounded-xl shadow-sm border border-stone-100">
+                        <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" onclick="openModalById(${item.id})">
+                        <div class="flex-grow min-w-0" onclick="openModalById(${item.id})">
+                            <div class="text-[13px] font-bold truncate">${item.title}</div>
+                        </div>
+                        <div class="text-[10px] text-red-400 font-medium px-2 py-1 cursor-pointer list-item-btn" onclick="removeFromCart(event, ${item.id})">削除</div>
+                   </div>
+                    <div class="text-[10px] text-red-300 px-2 list-item-btn" onclick="removeFromCart(event, ${item.id})">削除</div>
+               `;
+                list.appendChild(div);
+            });
+
+                wrapper.onpointerdown = handlePointerDown;
+                slot.appendChild(wrapper);
+                list.appendChild(slot);
+            }
+
+const orderBtn = document.getElementById('orderBtn');
+            if(cart.length === 1) orderBtn.classList.remove('disabled');
+            if(cart.length > 0) orderBtn.classList.remove('disabled');
+else orderBtn.classList.add('disabled');
+}
+
+        // --- Drag & Drop logic ---
+        let activeEl = null;
+        let startY = 0;
+        let placeholderIdx = -1;
+        let listItems = [];
+        let slots = [];
+
+        function handlePointerDown(e) {
+            if(e.target.closest('.list-item-btn')) return;
+
+            activeEl = this;
+            activeEl.setPointerCapture(e.pointerId);
+            
+            startY = e.clientY;
+            placeholderIdx = parseInt(activeEl.dataset.index);
+
+            activeEl.classList.add('dragging');
+            
+            listItems = Array.from(document.querySelectorAll('.cart-item-wrapper'));
+            slots = Array.from(document.querySelectorAll('.cart-slot'));
+
+            listItems.forEach(item => {
+                if(item !== activeEl) item.classList.add('animating');
+            });
+
+            activeEl.onpointermove = handlePointerMove;
+            activeEl.onpointerup = handlePointerUp;
+            activeEl.onpointercancel = handlePointerUp;
         }
 
-        function build() {
-            giftData.forEach(item => {
-                const cardHtml = `
-                    <div class="item-card" onclick="openModalById(${item.id})">
-                        <div class="img-container">
-                            <img src="${item.img}">
-                        </div>
-                        <div class="info-area">
-                            <div class="cat-badge">${item.label}</div>
-                            <h3 class="item-title">${item.title}</h3>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('grid-0').insertAdjacentHTML('beforeend', cardHtml);
-                const catGrid = document.getElementById(`grid-${item.cat}`);
-                if(catGrid) catGrid.insertAdjacentHTML('beforeend', cardHtml);
+        function handlePointerMove(e) {
+            if(!activeEl) return;
+
+            const deltaY = e.clientY - startY;
+            activeEl.style.transform = `translateY(${deltaY}px)`;
+
+            const activeRect = activeEl.getBoundingClientRect();
+            const activeCenter = activeRect.top + (activeRect.height / 2);
+
+            // スロットの境界をチェックして順序を入れ替える
+            slots.forEach((slot, slotIdx) => {
+                if (slotIdx === placeholderIdx) return;
+
+                const slotRect = slot.getBoundingClientRect();
+                const slotCenter = slotRect.top + (slotRect.height / 2);
+
+                // もしドラッグ中の中心が他のスロットの中心を超えたら
+                if (placeholderIdx < slotIdx && activeCenter > slotCenter) {
+                    // 下に移動
+                    shiftItems(placeholderIdx, slotIdx);
+                    placeholderIdx = slotIdx;
+                } else if (placeholderIdx > slotIdx && activeCenter < slotCenter) {
+                    // 上に移動
+                    shiftItems(placeholderIdx, slotIdx);
+                    placeholderIdx = slotIdx;
+                }
             });
         }
 
-        function openModalById(id) {
-            const item = giftData.find(i => i.id === id);
-            const modal = document.getElementById('modal');
-            document.getElementById('modalImg').src = item.img;
-            document.getElementById('modalTitle').innerText = item.title;
-            document.getElementById('modalDesc').innerText = item.desc;
-            document.getElementById('modalBadge').innerText = item.label;
+        function shiftItems(from, to) {
+            // cart配列を実際に並び替える
+            const item = cart.splice(from, 1)[0];
+            cart.splice(to, 0, item);
+
+            // 並び替えられた順序に基づいて、ドラッグ中以外の要素の transform を再計算
+            // これにより「ぬるっと」逃げる動きを作る
+            const wrapperHeight = 74; // スロット+マージンの概算高さ
+
+            listItems.forEach((itemEl) => {
+                if (itemEl === activeEl) return;
+                
+                const currentIdxInCart = cart.findIndex(c => c.id == itemEl.dataset.id);
+                const originalIdx = parseInt(itemEl.dataset.index);
+                
+                // 元の場所から現在のカート位置までの差分を計算
+                const diff = currentIdxInCart - originalIdx;
+                itemEl.style.transform = `translateY(${diff * wrapperHeight}px)`;
+            });
+        }
+
+        function handlePointerUp(e) {
+            if(!activeEl) return;
+
+            activeEl.onpointermove = null;
+            activeEl.onpointerup = null;
+            activeEl.onpointercancel = null;
+            activeEl.releasePointerCapture(e.pointerId);
+
+            activeEl.classList.remove('dragging');
             
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
-
-            // Fav State in Modal
-            const favBtn = document.getElementById('modalFavBtn');
-            const isFav = favorites.some(f => f.id === id);
-            favBtn.className = `btn-fav-detail ${isFav ? 'active' : ''}`;
-            favBtn.onclick = () => toggleFav(item);
-
-            document.getElementById('addToCartBtn').onclick = () => {
-                if(!cart.some(c => c.id === id)) {
-                    cart.push(item);
-                    updateStats();
-                    closeModal();
-                }
-            };
-        }
-
-        function toggleFav(item) {
-            const idx = favorites.findIndex(f => f.id === item.id);
-            if(idx > -1) favorites.splice(idx, 1);
-            else favorites.push(item);
+            // アニメーションを終了させ、UIを確定させる
+            updateCartUI();
             
-            document.getElementById('modalFavBtn').className = `btn-fav-detail ${favorites.some(f => f.id === item.id) ? 'active' : ''}`;
-            updateStats();
+            activeEl.style.transform = '';
+            activeEl = null;
         }
 
-        function updateStats() {
-            document.getElementById('cartBadge').innerText = cart.length;
-            document.getElementById('favBadge').innerText = favorites.length;
-            renderPanels();
-        }
+function updateFavUI() {
+const list = document.getElementById('favItemsList');
+document.getElementById('favBadge').innerText = favorites.length;
+list.innerHTML = '';
+favorites.forEach(item => {
+const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer';
+                div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer shadow-sm';
+div.innerHTML = `
+                   <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" onclick="openModalById(${item.id})">
+                   <div class="flex-grow min-w-0" onclick="openModalById(${item.id})">
+                       <div class="text-xs font-bold truncate">${item.title}</div>
+                   </div>
+                    <div class="text-[10px] text-stone-400 px-2 list-item-btn" onclick="toggleFav(event, ${item.id})">解除</div>
+                    <div class="text-[10px] text-stone-400 px-2 cursor-pointer" onclick="toggleFav(event, ${item.id})">解除</div>
+               `;
+list.appendChild(div);
+});
+@@ -490,8 +624,8 @@ <h3 class="item-title">${item.title}</h3>
+if(item) openModal(item);
+};
 
-        function renderPanels() {
-            const cList = document.getElementById('cartItemsList');
-            const fList = document.getElementById('favItemsList');
-            
-            cList.innerHTML = cart.map(item => `<div class="bg-stone-50 p-3 rounded-lg mb-2 flex gap-3 items-center"><img src="${item.img}" class="w-10 h-10 object-cover rounded"><div class="text-xs font-bold">${item.title}</div></div>`).join('');
-            fList.innerHTML = favorites.map(item => `<div class="bg-stone-50 p-3 rounded-lg mb-2 flex gap-3 items-center"><img src="${item.img}" class="w-10 h-10 object-cover rounded"><div class="text-xs font-bold">${item.title}</div></div>`).join('');
-        }
+        window.removeFromCart = (e, id) => {
+            e.stopPropagation();
+        window.removeFromCart = (event, id) => {
+            event.stopPropagation();
+cart = cart.filter(i => i.id !== id);
+updateCartUI();
+};
+@@ -503,8 +637,9 @@ <h3 class="item-title">${item.title}</h3>
+}
 
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            setTimeout(() => document.getElementById('modal').style.display = 'none', 400);
-        }
+document.getElementById('orderBtn').onclick = (e) => {
+            if (cart.length !== 1) return;
+            const finalUrl = `${CONFIG.formUrl}?usp=pp_url&${CONFIG.itemNameFieldId}=${encodeURIComponent(cart[0].title)}`;
+            if (cart.length === 0) return;
+            const itemNames = cart.map((it, idx) => `${idx + 1}位:${it.title}`).join(', ');
+            const finalUrl = `${CONFIG.formUrl}?usp=pp_url&${CONFIG.itemNameFieldId}=${encodeURIComponent(itemNames)}`;
+window.open(finalUrl, '_blank');
+};
 
-        function closePanel(id) {
-            document.getElementById(id).classList.remove('active');
-            setTimeout(() => document.getElementById(id).style.display = 'none', 400);
-        }
-
-        document.getElementById('cartTrigger').onclick = () => {
-            const p = document.getElementById('cartPanel');
-            p.style.display = 'flex';
-            setTimeout(() => p.classList.add('active'), 10);
-        };
-
-        document.getElementById('favTrigger').onclick = () => {
-            const p = document.getElementById('favPanel');
-            p.style.display = 'flex';
-            setTimeout(() => p.classList.add('active'), 10);
-        };
-
-        const scroller = document.getElementById('mainScroller');
-        const tabs = document.querySelectorAll('.nav-tabs span');
-        const indicator = document.getElementById('navIndicator');
-
-        function updateIndicator() {
-            const active = document.querySelector('.nav-tabs span.active');
-            if (active) { indicator.style.width = active.offsetWidth + 'px'; indicator.style.left = active.offsetLeft + 'px'; }
-        }
-
-        tabs.forEach(tab => {
-            tab.onclick = () => scroller.scrollTo({ left: window.innerWidth * tab.dataset.idx, behavior: 'smooth' });
-        });
-
-        scroller.onscroll = () => {
-            const idx = Math.round(scroller.scrollLeft / window.innerWidth);
-            tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
-            updateIndicator();
-        };
-
-        window.onresize = updateIndicator;
-    </script>
-</body>
-</html>
+@@ -537,6 +672,7 @@ <h3 class="item-title">${item.title}</h3>
+const p = document.getElementById('cartPanel');
+p.style.display = 'flex';
+setTimeout(() => p.classList.add('active'), 10);
+            updateCartUI();
+};
+document.getElementById('favTrigger').onclick = () => {
+const p = document.getElementById('favPanel');
