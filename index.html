@@ -11,7 +11,7 @@
             --bg-base: #f9f9f7;
             --text-main: #1a1a1a;
             --accent: #b08d57;
-            --warm-text: #8d6e63; /* 温かみのあるブラウン */
+            --warm-text: #8d6e63;
             --white: #ffffff;
             --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);
         }
@@ -21,8 +21,15 @@
             color: var(--text-main);
             font-family: 'Noto Sans JP', sans-serif;
             margin: 0;
-            overflow: hidden;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* 画面固定用の設定 */
+        body.modal-open { 
+            overflow: hidden; 
+            position: fixed;
+            width: 100%;
         }
 
         .serif { font-family: 'Cormorant Garamond', serif; }
@@ -103,15 +110,19 @@
         #cartPanel.active .cart-content { transform: translateX(0); }
         .cart-header { padding: 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 
-        #modal { position: fixed; inset: 0; z-index: 2500; display: none; align-items: center; justify-content: center; padding: 15px; }
+        /* モーダルの角丸とレイアウトを固定 */
+        #modal { position: fixed; inset: 0; z-index: 4000; display: none; align-items: center; justify-content: center; padding: 15px; }
         #modal.active { display: flex; }
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
         .modal-window {
-            position: relative; background: #fff; width: 100%; max-width: 800px;
-            max-height: 85vh; border-radius: 20px; overflow-y: auto; opacity: 0;
+            position: relative; background: #fff; width: 100%; max-width: 500px;
+            max-height: 85vh; border-radius: 30px; overflow: hidden; opacity: 0;
             transform: translateY(20px); transition: 0.4s var(--ease-fluid);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex; flex-direction: column;
         }
         #modal.active .modal-window { opacity: 1; transform: translateY(0); }
+        .modal-scroll-area { overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
 
         .btn-order {
             margin: 20px; background: var(--accent); color: #fff;
@@ -120,9 +131,8 @@
         }
         .btn-order.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 
-        /* 装飾を強化したレコメンドボックス */
         .recommend-box {
-            background: #fffcf9; /* より明るく温かい白 */
+            background: #fffcf9;
             border-left: 3px solid var(--accent);
             padding: 20px 24px;
             border-radius: 0 16px 16px 0;
@@ -134,7 +144,7 @@
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(#e0d6c5 0.5px, transparent 0.5px); /* 微かな紙の質感 */
+            background-image: radial-gradient(#e0d6c5 0.5px, transparent 0.5px);
             background-size: 10px 10px;
             opacity: 0.2;
             pointer-events: none;
@@ -157,9 +167,16 @@
             margin-bottom: 12px;
             letter-spacing: 0.1em;
         }
+
+        #addToCartBtn.already-in-cart {
+            background-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <div id="authOverlay">
         <div class="auth-card">
@@ -172,7 +189,7 @@
     </div>
 
     <div id="appContent">
-        <header>
+        <header id="mainHeader">
             <div class="header-inner">
                 <div class="serif text-xl font-bold tracking-tighter">THE GIFT</div>
                 <nav class="nav-tabs" id="navTabs">
@@ -212,19 +229,21 @@
             <div class="modal-overlay" id="modalOverlay"></div>
             <div class="modal-window">
                 <div id="modalClose" class="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-10 text-xl font-bold shadow-sm">×</div>
-                <img id="modalImg" src="" class="w-full aspect-square object-cover">
-                <div class="p-6">
-                    <div id="modalBadge" class="cat-badge"></div>
-                    <h2 id="modalTitle" class="text-xl font-bold"></h2>
-                    <p id="modalDesc" class="mt-4 text-stone-600 text-sm leading-relaxed"></p>
-                    
-                    <div id="recommendSection" class="recommend-box hidden">
-                        <span class="recommend-label">Our Recommendation</span>
-                        <p id="modalRecommend" class="mincho text-sm italic"></p>
-                        <div class="mt-3 text-right text-[10px] text-stone-400">— From Us</div>
-                    </div>
+                <div class="modal-scroll-area">
+                    <img id="modalImg" src="" class="w-full aspect-square object-cover">
+                    <div class="p-6">
+                        <div id="modalBadge" class="cat-badge"></div>
+                        <h2 id="modalTitle" class="text-xl font-bold"></h2>
+                        <p id="modalDesc" class="mt-4 text-stone-600 text-sm leading-relaxed"></p>
+                        
+                        <div id="recommendSection" class="recommend-box hidden">
+                            <span class="recommend-label">Our Recommendation</span>
+                            <p id="modalRecommend" class="mincho text-sm italic"></p>
+                            <div class="mt-3 text-right text-[10px] text-stone-400">— From Us</div>
+                        </div>
 
-                    <button class="w-full bg-black text-white p-4 mt-8 rounded-xl font-bold" id="addToCartBtn">このギフトを選択する</button>
+                        <button class="w-full bg-black text-white p-4 mt-8 mb-4 rounded-xl font-bold transition-colors" id="addToCartBtn">このギフトを選択する</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -259,7 +278,6 @@
             if(input === CONFIG.password) {
                 document.getElementById('authOverlay').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
-                document.body.style.overflow = '';
                 build();
             } else {
                 document.getElementById('authError').classList.remove('hidden');
@@ -299,14 +317,25 @@
                 recSection.classList.add('hidden');
             }
 
+            const addBtn = document.getElementById('addToCartBtn');
+            if (cart.find(i => i.id === item.id)) {
+                addBtn.innerText = "選択済みです";
+                addBtn.classList.add('already-in-cart');
+            } else {
+                addBtn.innerText = "このギフトを選択する";
+                addBtn.classList.remove('already-in-cart');
+            }
+
             const modal = document.getElementById('modal');
             modal.style.display = 'flex';
+            document.getElementById('mainBody').classList.add('modal-open');
             setTimeout(() => modal.classList.add('active'), 10);
         }
 
         function closeModal() {
             const modal = document.getElementById('modal');
             modal.classList.remove('active');
+            document.getElementById('mainBody').classList.remove('modal-open');
             setTimeout(() => modal.style.display = 'none', 400);
         }
 
@@ -400,6 +429,7 @@
             setTimeout(() => p.style.display = 'none', 400);
         };
         document.getElementById('modalClose').onclick = closeModal;
+        document.getElementById('modalOverlay').onclick = closeModal;
         document.getElementById('addToCartBtn').onclick = addToCart;
     </script>
 </body>
