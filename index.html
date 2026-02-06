@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE GIFT | Wedding Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f9f9f7;
+            --text-main: #1a1a1a;
+            --accent: #b08d57;
+            --warm-text: #8d6e63; /* 温かみのあるブラウン */
+            --white: #ffffff;
+            --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .serif { font-family: 'Cormorant Garamond', serif; }
+        .mincho { font-family: 'Shippori Mincho', serif; }
+
+        /* 認証画面 */
+        #authOverlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--bg-base);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
+        }
+        .auth-card {
+            background: var(--white); padding: 40px 30px; border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 100%; max-width: 360px;
+        }
+        .auth-input {
+            width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px;
+            margin: 20px 0 10px; text-align: center; letter-spacing: 0.3em; font-size: 20px;
+            outline: none; transition: border-color 0.3s;
+        }
+        .auth-btn {
+            width: 100%; padding: 16px; background: var(--text-main);
+            color: #fff; border-radius: 12px; font-weight: 700; cursor: pointer;
+        }
+
+        #appContent { display: none; }
+
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255, 255, 255, 0.98); z-index: 1000;
+            display: flex; align-items: center; border-bottom: 1px solid #eee;
+        }
+        .header-inner {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; max-width: 1400px; margin: 0 auto; width: 100%;
+        }
+        .nav-tabs { display: flex; gap: 15px; position: relative; }
+        .nav-tabs span { font-size: 11px; font-weight: 700; color: #888; cursor: pointer; padding: 10px 0; }
+        .nav-tabs span.active { color: var(--text-main); }
+        .nav-indicator { position: absolute; bottom: 0; height: 3px; background: var(--text-main); transition: 0.4s var(--ease-fluid); }
+
+        .main-scroller {
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+            height: calc(100vh - 70px); margin-top: 70px; scrollbar-width: none;
+        }
+        .main-scroller::-webkit-scrollbar { display: none; }
+        .page-section { flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; padding: 20px; overflow-y: auto; }
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 1400px; margin: 0 auto; padding-bottom: 120px; }
+
+        .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; }
+        .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .info-area { padding: 12px; }
+        .cat-badge { font-size: 9px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+        .item-title { font-size: 13px; font-weight: 700; }
+
+        .cart-trigger {
+            position: fixed; bottom: 30px; right: 20px; width: 64px; height: 64px;
+            background: var(--text-main); color: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 1500; cursor: pointer;
+        }
+        .cart-badge-num {
+            position: absolute; top: 0; right: 0; background: var(--accent);
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
+            font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+        }
+
+        #cartPanel { position: fixed; inset: 0; z-index: 3000; display: none; justify-content: flex-end; }
+        #cartPanel.active { display: flex; }
+        .cart-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .cart-content {
+            position: relative; width: 85%; max-width: 400px; height: 100%;
+            background: #fff; transform: translateX(100%); transition: 0.4s var(--ease-fluid);
+            display: flex; flex-direction: column;
+        }
+        #cartPanel.active .cart-content { transform: translateX(0); }
+        .cart-header { padding: 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+
+        #modal { position: fixed; inset: 0; z-index: 2500; display: none; align-items: center; justify-content: center; padding: 15px; }
+        #modal.active { display: flex; }
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        .modal-window {
+            position: relative; background: #fff; width: 100%; max-width: 800px;
+            max-height: 85vh; border-radius: 20px; overflow-y: auto; opacity: 0;
+            transform: translateY(20px); transition: 0.4s var(--ease-fluid);
+        }
+        #modal.active .modal-window { opacity: 1; transform: translateY(0); }
+
+        .btn-order {
+            margin: 20px; background: var(--accent); color: #fff;
+            padding: 18px; text-align: center; border-radius: 12px;
+            font-weight: 700; cursor: pointer;
+        }
+        .btn-order.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+        /* 装飾を強化したレコメンドボックス */
+        .recommend-box {
+            background: #fffcf9; /* より明るく温かい白 */
+            border-left: 3px solid var(--accent);
+            padding: 20px 24px;
+            border-radius: 0 16px 16px 0;
+            margin-top: 24px;
+            position: relative;
+            box-shadow: 2px 2px 10px rgba(176, 141, 87, 0.05);
+        }
+        .recommend-box::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(#e0d6c5 0.5px, transparent 0.5px); /* 微かな紙の質感 */
+            background-size: 10px 10px;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+        #modalRecommend {
+            color: var(--warm-text);
+            line-height: 1.8;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+        }
+        .recommend-label {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="authOverlay">
+        <div class="auth-card">
+            <h1 class="serif text-2xl mb-2 tracking-widest">WELCOME</h1>
+            <p class="text-stone-500 text-xs">招待状に記載されている<br>パスコードを入力してください</p>
+            <input type="tel" id="passInput" class="auth-input" placeholder="0000" maxlength="4">
+            <div id="authError" class="text-red-500 text-[10px] mt-2 hidden">パスコードが正しくありません</div>
+            <button onclick="checkPass()" class="auth-btn mt-4">カタログを見る</button>
+        </div>
+    </div>
+
+    <div id="appContent">
+        <header>
+            <div class="header-inner">
+                <div class="serif text-xl font-bold tracking-tighter">THE GIFT</div>
+                <nav class="nav-tabs" id="navTabs">
+                    <span class="active" data-idx="0">すべて</span>
+                    <span data-idx="1">グルメ</span>
+                    <span data-idx="2">雑貨</span>
+                    <div class="nav-indicator" id="navIndicator"></div>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-scroller" id="mainScroller">
+            <section class="page-section"><div class="card-grid"></div></section>
+            <section class="page-section"><div class="card-grid"></div></section>
+            <section class="page-section"><div class="card-grid"></div></section>
+        </main>
+
+        <div class="cart-trigger" id="cartTrigger">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+            <div class="cart-badge-num" id="cartBadge">0</div>
+        </div>
+
+        <div id="cartPanel">
+            <div class="cart-overlay" id="cartOverlay"></div>
+            <div class="cart-content">
+                <div class="cart-header">
+                    <h2 class="font-bold text-lg">選択リスト</h2>
+                    <div class="cursor-pointer text-2xl px-2" id="closeCart">×</div>
+                </div>
+                <div class="cart-items-list flex-grow overflow-y-auto p-4" id="cartItemsList"></div>
+                <div id="orderError" class="text-red-500 text-[10px] text-center px-4 hidden">※お一人様1点までお選びいただけます。</div>
+                <div class="btn-order" id="orderBtn">注文フォームへ進む</div>
+            </div>
+        </div>
+
+        <div id="modal">
+            <div class="modal-overlay" id="modalOverlay"></div>
+            <div class="modal-window">
+                <div id="modalClose" class="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-10 text-xl font-bold shadow-sm">×</div>
+                <img id="modalImg" src="" class="w-full aspect-square object-cover">
+                <div class="p-6">
+                    <div id="modalBadge" class="cat-badge"></div>
+                    <h2 id="modalTitle" class="text-xl font-bold"></h2>
+                    <p id="modalDesc" class="mt-4 text-stone-600 text-sm leading-relaxed"></p>
+                    
+                    <div id="recommendSection" class="recommend-box hidden">
+                        <span class="recommend-label">Our Recommendation</span>
+                        <p id="modalRecommend" class="mincho text-sm italic"></p>
+                        <div class="mt-3 text-right text-[10px] text-stone-400">— From Us</div>
+                    </div>
+
+                    <button class="w-full bg-black text-white p-4 mt-8 rounded-xl font-bold" id="addToCartBtn">このギフトを選択する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            password: "2024",
+            formUrl: "https://docs.google.com/forms/d/e/1FAIpQLScBGUbrytDAVbQakEl9nh7Le3hJ1jPHgCDV7t83p2dFHltaPw/viewform",
+            itemNameFieldId: "entry.1962469833"
+        };
+
+        const giftData = [
+            { 
+                id: 1, cat: 1, label: 'GOURMET', 
+                title: '朝摘み有機のドリップ珈琲', 
+                desc: '朝一番の新鮮な香りを閉じ込めたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', 
+                recommend: '私たちが毎朝飲んでいるお気に入りのコーヒーです。封を開けた時の香りが最高なので、ぜひゆっくりした時間に楽しんでほしいです！',
+                img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' 
+            },
+            { 
+                id: 2, cat: 2, label: 'LIVING', 
+                title: '今治産オーガニックタオル', 
+                desc: '使うほどに肌に馴染む、極上の柔らかさ。綿本来の良さを引き出した逸品。', 
+                recommend: '実際に使ってみて、そのふわふわ感に本当に感動しました。毎日使うものだからこそ、ちょっと良いものを選んでもらえたら嬉しいです。',
+                img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800' 
+            }
+        ];
+
+        function checkPass() {
+            const input = document.getElementById('passInput').value;
+            if(input === CONFIG.password) {
+                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                document.body.style.overflow = '';
+                build();
+            } else {
+                document.getElementById('authError').classList.remove('hidden');
+                document.getElementById('passInput').value = '';
+            }
+        }
+
+        let cart = [];
+        let currentItem = null;
+
+        function build() {
+            const grids = document.querySelectorAll('.card-grid');
+            grids.forEach(g => g.innerHTML = '');
+            giftData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `<div class="img-container"><img src="${item.img}"></div><div class="info-area"><div class="cat-badge">${item.label}</div><h3 class="item-title">${item.title}</h3></div>`;
+                card.onclick = () => openModal(item);
+                grids[0].appendChild(card.cloneNode(true)).onclick = () => openModal(item);
+                if (grids[item.cat]) grids[item.cat].appendChild(card).onclick = () => openModal(item);
+            });
+            updateIndicator();
+        }
+
+        function openModal(item) {
+            currentItem = item;
+            document.getElementById('modalImg').src = item.img;
+            document.getElementById('modalBadge').innerText = item.label;
+            document.getElementById('modalTitle').innerText = item.title;
+            document.getElementById('modalDesc').innerText = item.desc;
+            
+            const recSection = document.getElementById('recommendSection');
+            if(item.recommend) {
+                document.getElementById('modalRecommend').innerText = item.recommend;
+                recSection.classList.remove('hidden');
+            } else {
+                recSection.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
+
+        function addToCart() {
+            if (currentItem && !cart.find(i => i.id === currentItem.id)) {
+                cart.push(currentItem);
+                updateCartUI();
+                closeModal();
+            }
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cartItemsList');
+            document.getElementById('cartBadge').innerText = cart.length;
+            list.innerHTML = '';
+            cart.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer';
+                div.innerHTML = `
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover" onclick="openModalById(${item.id})">
+                    <div class="flex-grow" onclick="openModalById(${item.id})">
+                        <div class="text-xs font-bold">${item.title}</div>
+                        <div class="text-[10px] text-stone-400">詳細を見る</div>
+                    </div>
+                    <div class="text-[10px] text-red-300 px-2" onclick="removeFromCart(event, ${item.id})">削除</div>
+                `;
+                list.appendChild(div);
+            });
+            const orderBtn = document.getElementById('orderBtn');
+            const err = document.getElementById('orderError');
+            if(cart.length === 1) {
+                orderBtn.classList.remove('disabled');
+                err.classList.add('hidden');
+            } else {
+                orderBtn.classList.add('disabled');
+                if(cart.length > 1) err.classList.remove('hidden');
+            }
+        }
+
+        window.openModalById = (id) => {
+            const item = giftData.find(i => i.id === id);
+            if(item) openModal(item);
+        };
+
+        window.removeFromCart = (e, id) => {
+            e.stopPropagation();
+            cart = cart.filter(i => i.id !== id);
+            updateCartUI();
+        };
+
+        document.getElementById('orderBtn').onclick = (e) => {
+            e.preventDefault();
+            if (cart.length !== 1) return;
+            const finalUrl = `${CONFIG.formUrl}?usp=pp_url&${CONFIG.itemNameFieldId}=${encodeURIComponent(cart[0].title)}`;
+            window.open(finalUrl, '_blank');
+        };
+
+        const scroller = document.getElementById('mainScroller');
+        const tabs = document.querySelectorAll('.nav-tabs span');
+        const indicator = document.getElementById('navIndicator');
+
+        function updateIndicator() {
+            const active = document.querySelector('.nav-tabs span.active');
+            if (active) {
+                indicator.style.width = active.offsetWidth + 'px';
+                indicator.style.left = active.offsetLeft + 'px';
+            }
+        }
+
+        tabs.forEach(tab => {
+            tab.onclick = () => {
+                const idx = tab.getAttribute('data-idx');
+                scroller.scrollTo({ left: window.innerWidth * idx, behavior: 'smooth' });
+            };
+        });
+
+        scroller.onscroll = () => {
+            const idx = Math.round(scroller.scrollLeft / window.innerWidth);
+            tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+            updateIndicator();
+        };
+
+        document.getElementById('cartTrigger').onclick = () => {
+            const p = document.getElementById('cartPanel');
+            p.style.display = 'flex';
+            setTimeout(() => p.classList.add('active'), 10);
+        };
+        document.getElementById('closeCart').onclick = () => {
+            const p = document.getElementById('cartPanel');
+            p.classList.remove('active');
+            setTimeout(() => p.style.display = 'none', 400);
+        };
+        document.getElementById('modalClose').onclick = closeModal;
+        document.getElementById('addToCartBtn').onclick = addToCart;
+    </script>
+</body>
+</html>
+
