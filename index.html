@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>THE GIFT | Wedding Selection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
@@ -76,7 +76,16 @@
         }
         .main-scroller::-webkit-scrollbar { display: none; }
         .page-section { flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; padding: 20px; overflow-y: auto; }
-        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 1400px; margin: 0 auto; padding-bottom: 120px; }
+        
+        /* 下部のボタンと被らないように余白を大きく設定 */
+        .card-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding-bottom: 180px; 
+        }
 
         .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
         .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; position: relative; }
@@ -98,16 +107,24 @@
         .fav-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; transition: 0.2s; }
         .fav-icon.active svg { fill: #ff4d4d; stroke: #ff4d4d; }
 
-        .float-controls { position: fixed; bottom: 30px; right: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 1500; }
+        .float-controls { 
+            position: fixed; 
+            bottom: calc(20px + env(safe-area-inset-bottom)); 
+            right: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            z-index: 1500; 
+        }
         .float-btn {
-            width: 60px; height: 60px; background: var(--text-main); color: #fff;
+            width: 56px; height: 56px; background: var(--text-main); color: #fff;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); cursor: pointer; position: relative;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); cursor: pointer; position: relative;
         }
         .btn-badge {
-            position: absolute; top: 0; right: 0; background: var(--accent);
-            width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
-            font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+            position: absolute; top: -2px; right: -2px; background: var(--accent);
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff;
+            font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
         }
 
         .side-panel { position: fixed; inset: 0; z-index: 3000; display: none; justify-content: flex-end; }
@@ -121,14 +138,19 @@
         .side-panel.active .panel-content { transform: translateX(0); }
         .panel-header { padding: 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 
-        #modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 15px; }
+        #modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
         #modal.active { display: flex; }
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
         
-        /* iPhone Safari等でアドレスバーが動いても見切れないよう85vh程度に制限 */
+        /* モバイル環境での絶対的な収まりを保証。
+           dvh (dynamic viewport height) が使える場合は優先し、Safariのツールバー変化にも対応 
+        */
         .modal-window {
-            position: relative; background: #fff; width: 100%; max-width: 500px;
-            max-height: 85vh; border-radius: 24px; overflow: hidden; opacity: 0;
+            position: relative; background: #fff; width: 100%; max-width: 460px;
+            height: auto;
+            max-height: 80vh; 
+            max-height: 80dvh;
+            border-radius: 20px; overflow: hidden; opacity: 0;
             transform: translateY(20px); transition: 0.4s var(--ease-fluid);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
             display: flex; flex-direction: column;
@@ -187,12 +209,13 @@
             pointer-events: none;
         }
 
-        /* モーダル画像が大きすぎないように制限 */
+        /* 画像は正方形を維持 */
         #modalImgContainer {
             width: 100%;
-            max-height: 40vh;
+            aspect-ratio: 1/1;
             overflow: hidden;
             position: relative;
+            background: #f3f3f3;
         }
     </style>
 </head>
