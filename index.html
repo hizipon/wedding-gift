@@ -77,14 +77,13 @@
         .main-scroller::-webkit-scrollbar { display: none; }
         .page-section { flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; padding: 20px; overflow-y: auto; }
         
-        /* 下部のボタンと被らないように余白を大きく設定 */
         .card-grid { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 12px; 
             max-width: 1400px; 
             margin: 0 auto; 
-            padding-bottom: 180px; 
+            padding-bottom: 220px; /* フローティングボタン分を確実に確保 */
         }
 
         .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
@@ -109,7 +108,7 @@
 
         .float-controls { 
             position: fixed; 
-            bottom: calc(20px + env(safe-area-inset-bottom)); 
+            bottom: calc(40px + env(safe-area-inset-bottom)); /* Safariツールバー回避のため底上げ */
             right: 20px; 
             display: flex; 
             flex-direction: column; 
@@ -142,14 +141,11 @@
         #modal.active { display: flex; }
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
         
-        /* モバイル環境での絶対的な収まりを保証。
-           dvh (dynamic viewport height) が使える場合は優先し、Safariのツールバー変化にも対応 
-        */
         .modal-window {
             position: relative; background: #fff; width: 100%; max-width: 460px;
             height: auto;
-            max-height: 80vh; 
-            max-height: 80dvh;
+            max-height: 75vh; /* 確実に画面内に収まるようさらに制限 */
+            max-height: 75dvh;
             border-radius: 20px; overflow: hidden; opacity: 0;
             transform: translateY(20px); transition: 0.4s var(--ease-fluid);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
@@ -209,13 +205,18 @@
             pointer-events: none;
         }
 
-        /* 画像は正方形を維持 */
         #modalImgContainer {
             width: 100%;
             aspect-ratio: 1/1;
             overflow: hidden;
             position: relative;
             background: #f3f3f3;
+        }
+
+        /* 文字が縦書きにならないための固定設定 */
+        .list-item-btn {
+            flex-shrink: 0;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -454,11 +455,11 @@
                 const div = document.createElement('div');
                 div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer';
                 div.innerHTML = `
-                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover" onclick="openModalById(${item.id})">
-                    <div class="flex-grow" onclick="openModalById(${item.id})">
-                        <div class="text-xs font-bold">${item.title}</div>
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" onclick="openModalById(${item.id})">
+                    <div class="flex-grow min-w-0" onclick="openModalById(${item.id})">
+                        <div class="text-xs font-bold truncate">${item.title}</div>
                     </div>
-                    <div class="text-[10px] text-red-300 px-2" onclick="removeFromCart(event, ${item.id})">削除</div>
+                    <div class="text-[10px] text-red-300 px-2 list-item-btn" onclick="removeFromCart(event, ${item.id})">削除</div>
                 `;
                 list.appendChild(div);
             });
@@ -475,11 +476,11 @@
                 const div = document.createElement('div');
                 div.className = 'flex items-center gap-4 mb-4 bg-stone-50 p-3 rounded-xl cursor-pointer';
                 div.innerHTML = `
-                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover" onclick="openModalById(${item.id})">
-                    <div class="flex-grow" onclick="openModalById(${item.id})">
-                        <div class="text-xs font-bold">${item.title}</div>
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" onclick="openModalById(${item.id})">
+                    <div class="flex-grow min-w-0" onclick="openModalById(${item.id})">
+                        <div class="text-xs font-bold truncate">${item.title}</div>
                     </div>
-                    <div class="text-[10px] text-stone-400 px-2" onclick="toggleFav(event, ${item.id})">解除</div>
+                    <div class="text-[10px] text-stone-400 px-2 list-item-btn" onclick="toggleFav(event, ${item.id})">解除</div>
                 `;
                 list.appendChild(div);
             });
