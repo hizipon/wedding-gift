@@ -83,7 +83,7 @@
             gap: 12px; 
             max-width: 1400px; 
             margin: 0 auto; 
-            padding-bottom: 220px; /* フローティングボタン分を確実に確保 */
+            padding-bottom: 280px; /* ここを大きく広げ、確実にボタンとの被りを解消 */
         }
 
         .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
@@ -108,7 +108,7 @@
 
         .float-controls { 
             position: fixed; 
-            bottom: calc(40px + env(safe-area-inset-bottom)); /* Safariツールバー回避のため底上げ */
+            bottom: calc(40px + env(safe-area-inset-bottom)); 
             right: 20px; 
             display: flex; 
             flex-direction: column; 
@@ -144,7 +144,7 @@
         .modal-window {
             position: relative; background: #fff; width: 100%; max-width: 460px;
             height: auto;
-            max-height: 75vh; /* 確実に画面内に収まるようさらに制限 */
+            max-height: 75vh; 
             max-height: 75dvh;
             border-radius: 20px; overflow: hidden; opacity: 0;
             transform: translateY(20px); transition: 0.4s var(--ease-fluid);
@@ -213,7 +213,6 @@
             background: #f3f3f3;
         }
 
-        /* 文字が縦書きにならないための固定設定 */
         .list-item-btn {
             flex-shrink: 0;
             white-space: nowrap;
