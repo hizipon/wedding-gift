@@ -25,12 +25,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        body.modal-open { 
-            overflow: hidden; 
-            position: fixed;
-            width: 100%;
-        }
-
         .serif { font-family: 'Cormorant Garamond', serif; }
         .mincho { font-family: 'Shippori Mincho', serif; }
 
@@ -43,7 +37,6 @@
             transition: opacity 0.8s var(--ease-fluid), transform 0.8s var(--ease-fluid);
         }
         
-        /* Animated Background Shapes for Auth */
         .auth-bg-decor {
             position: absolute; inset: 0; overflow: hidden; z-index: -1; pointer-events: none;
         }
@@ -75,7 +68,6 @@
             color: #fff; border-radius: 12px; font-weight: 700; cursor: pointer;
             transition: transform 0.2s;
         }
-        .auth-btn:active { transform: scale(0.98); }
 
         #appContent { 
             display: none; 
@@ -89,11 +81,13 @@
             transform: scale(1);
         }
 
-        /* Main UI */
+        /* Header Optimization */
         header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            position: fixed; top: 0; left: 0; width: 100%; 
+            height: 70px; /* Fixed height */
             background: rgba(255, 255, 255, 0.98); z-index: 1000;
             display: flex; align-items: center; border-bottom: 1px solid #eee;
+            padding-top: env(safe-area-inset-top);
         }
         .header-inner {
             display: flex; justify-content: space-between; align-items: center;
@@ -106,18 +100,20 @@
 
         .main-scroller {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-            height: calc(100vh - 70px); margin-top: 70px; scrollbar-width: none;
+            height: 100vh;
+            margin-top: 0;
+            scrollbar-width: none;
         }
         .main-scroller::-webkit-scrollbar { display: none; }
-        .page-section { flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; padding: 20px; overflow-y: auto; }
+        .page-section { 
+            flex: 0 0 100vw; width: 100vw; scroll-snap-align: start; 
+            padding: 90px 20px 20px; /* Top padding to clear header */
+            overflow-y: auto; 
+        }
         
         .card-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding-bottom: 400px; 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; 
+            max-width: 1400px; margin: 0 auto; padding-bottom: 120px; 
         }
 
         .item-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; position: relative; }
@@ -127,18 +123,9 @@
         .cat-badge { font-size: 9px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
         .item-title { font-size: 13px; font-weight: 700; }
 
-        .fav-icon {
-            width: 32px; height: 32px; background: #f5f5f5;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
-        .item-card .fav-icon { position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); }
-        
         .float-controls { 
             position: fixed; 
-            bottom: calc(40px + env(safe-area-inset-bottom)); 
+            bottom: calc(30px + env(safe-area-inset-bottom)); 
             right: 20px; 
             display: flex; 
             flex-direction: column; 
@@ -156,27 +143,40 @@
             font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Cart & Dragging Improvements */
-        .cart-slot { position: relative; margin-bottom: 16px; min-height: 100px; display: flex; flex-direction: column; }
-        .rank-label-fixed { font-size: 10px; font-weight: 800; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; pointer-events: none; }
-        .rank-label-fixed::after { content: ""; flex-grow: 1; height: 1px; background: #eee; }
-        
-        .cart-slot-target {
-            width: 100%; height: 74px; border: 1px dashed #e5e7eb; border-radius: 12px;
-            background: #fafafa; position: relative;
+        /* Modal Styles */
+        #modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        #modal.active { display: flex; }
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        .modal-window {
+            position: relative; background: #fff; width: 100%; max-width: 460px;
+            max-height: 85dvh; border-radius: 24px; overflow: hidden; opacity: 0;
+            transform: translateY(20px); transition: 0.4s var(--ease-fluid);
+            display: flex; flex-direction: column;
+        }
+        #modal.active .modal-window { opacity: 1; transform: translateY(0); }
+        .modal-scroll-area { overflow-y: auto; flex-grow: 1; }
+
+        /* Detail Action Bar */
+        .detail-action-bar {
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            border-top: 1px solid #f0f0f0;
+            display: flex; gap: 10px;
+            background: #fff;
+        }
+        .btn-fav-detail {
+            width: 54px; height: 54px; border: 1.5px solid #eee; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; color: #1a1a1a;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .btn-fav-detail.active { background: #fff1f1; border-color: #ffcccc; color: #ff4d4d; }
+        .btn-add-cart {
+            flex-grow: 1; height: 54px; background: var(--text-main); color: #fff;
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px;
         }
 
-        .cart-item-wrapper {
-            position: absolute; top: 0; left: 0; width: 100%; cursor: grab; user-select: none; 
-            touch-action: none; z-index: 10;
-        }
-        .cart-item-wrapper.dragging {
-            opacity: 0.95; z-index: 100; box-shadow: 0 15px 35px rgba(0,0,0,0.15); transition: none !important;
-        }
-        .cart-item-wrapper.animating {
-            transition: transform 0.4s var(--ease-fluid);
-        }
-
+        /* Side Panel */
         .side-panel { position: fixed; inset: 0; z-index: 3000; display: none; justify-content: flex-end; }
         .side-panel.active { display: flex; }
         .panel-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
@@ -186,31 +186,9 @@
             display: flex; flex-direction: column;
         }
         .side-panel.active .panel-content { transform: translateX(0); }
-
-        #modal { position: fixed; inset: 0; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        #modal.active { display: flex; }
-        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
-        
-        .modal-window {
-            position: relative; background: #fff; width: 100%; max-width: 460px;
-            max-height: 75dvh;
-            border-radius: 20px; overflow: hidden; opacity: 0;
-            transform: translateY(20px); transition: 0.4s var(--ease-fluid);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-            display: flex; flex-direction: column;
-        }
-        #modal.active .modal-window { opacity: 1; transform: translateY(0); }
-        .modal-scroll-area { overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
-
-        .btn-order {
-            margin: 20px; background: var(--accent); color: #fff;
-            padding: 18px; text-align: center; border-radius: 12px;
-            font-weight: 700; cursor: pointer;
-        }
-        .btn-order.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
     </style>
 </head>
-<body id="mainBody">
+<body>
 
     <div id="authOverlay">
         <div class="auth-bg-decor">
@@ -231,7 +209,7 @@
         <header>
             <div class="header-inner">
                 <div class="serif text-xl font-bold tracking-tighter">THE GIFT</div>
-                <nav class="nav-tabs" id="navTabs">
+                <nav class="nav-tabs">
                     <span class="active" data-idx="0">すべて</span>
                     <span data-idx="1">グルメ</span>
                     <span data-idx="2">雑貨</span>
@@ -241,232 +219,172 @@
         </header>
 
         <main class="main-scroller" id="mainScroller">
-            <section class="page-section"><div class="card-grid"></div></section>
-            <section class="page-section"><div class="card-grid"></div></section>
-            <section class="page-section"><div class="card-grid"></div></section>
+            <section class="page-section"><div class="card-grid" id="grid-0"></div></section>
+            <section class="page-section"><div class="card-grid" id="grid-1"></div></section>
+            <section class="page-section"><div class="card-grid" id="grid-2"></div></section>
         </main>
 
         <div class="float-controls">
             <div class="float-btn" id="favTrigger" style="background: #fff; color: #1a1a1a; border: 1px solid #eee;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                 <div class="btn-badge" id="favBadge">0</div>
             </div>
             <div class="float-btn" id="cartTrigger">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
                 <div class="btn-badge" id="cartBadge">0</div>
             </div>
         </div>
 
-        <!-- Panels and Modal (Logic remains Same) -->
+        <!-- Detail Modal -->
+        <div id="modal">
+            <div class="modal-overlay" onclick="closeModal()"></div>
+            <div class="modal-window">
+                <div onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-20 shadow-sm text-lg">✕</div>
+                <div class="modal-scroll-area">
+                    <img id="modalImg" src="" class="w-full aspect-square object-cover">
+                    <div class="p-6">
+                        <div id="modalBadge" class="cat-badge"></div>
+                        <h2 id="modalTitle" class="text-xl font-bold leading-tight"></h2>
+                        <p id="modalDesc" class="mt-4 text-stone-600 text-[14px] leading-relaxed"></p>
+                    </div>
+                </div>
+                <!-- Requested Detail Bar -->
+                <div class="detail-action-bar">
+                    <div class="btn-fav-detail" id="modalFavBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                    </div>
+                    <button class="btn-add-cart" id="addToCartBtn">このギフトを選択する</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panels -->
         <div id="cartPanel" class="side-panel">
             <div class="panel-overlay" onclick="closePanel('cartPanel')"></div>
             <div class="panel-content">
-                <div class="panel-header p-6 border-bottom border-stone-100 flex justify-between items-center">
-                    <div>
-                        <h2 class="font-bold text-lg">選択リスト</h2>
-                        <span class="text-[9px] text-stone-400">長押しして順位を入れ替えられます</span>
-                    </div>
-                    <div class="cursor-pointer text-2xl px-2" onclick="closePanel('cartPanel')">×</div>
+                <div class="p-6 border-b border-stone-100 flex justify-between items-end">
+                    <h2 class="font-bold text-lg">選択リスト</h2>
+                    <div class="cursor-pointer text-xl" onclick="closePanel('cartPanel')">✕</div>
                 </div>
                 <div class="flex-grow overflow-y-auto p-4" id="cartItemsList"></div>
-                <div class="btn-order" id="orderBtn">注文フォームへ進む</div>
             </div>
         </div>
 
         <div id="favPanel" class="side-panel">
             <div class="panel-overlay" onclick="closePanel('favPanel')"></div>
             <div class="panel-content">
-                <div class="panel-header p-6 flex justify-between items-center">
+                <div class="p-6 border-b border-stone-100 flex justify-between items-end">
                     <h2 class="font-bold text-lg">お気に入り</h2>
-                    <div class="cursor-pointer text-2xl px-2" onclick="closePanel('favPanel')">×</div>
+                    <div class="cursor-pointer text-xl" onclick="closePanel('favPanel')">✕</div>
                 </div>
                 <div class="flex-grow overflow-y-auto p-4" id="favItemsList"></div>
-            </div>
-        </div>
-
-        <div id="modal">
-            <div class="modal-overlay" onclick="closeModal()"></div>
-            <div class="modal-window">
-                <div onclick="closeModal()" class="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center cursor-pointer z-20 text-xl font-bold shadow-md">×</div>
-                <div class="modal-scroll-area">
-                    <img id="modalImg" src="" class="w-full aspect-square object-cover">
-                    <div class="p-5">
-                        <div id="modalBadge" class="cat-badge"></div>
-                        <h2 id="modalTitle" class="text-lg font-bold"></h2>
-                        <p id="modalDesc" class="mt-3 text-stone-600 text-[13px] leading-relaxed"></p>
-                        <div id="modalInfoArea"></div>
-                        <button class="w-full bg-black text-white p-4 rounded-xl font-bold text-sm mt-6 mb-4" id="addToCartBtn">このギフトを選択する</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const CONFIG = {
-            password: "2024",
-            maxCart: 3
-        };
-
         const giftData = [
             { id: 1, cat: 1, label: 'GOURMET', title: '朝摘み有機ドリップ珈琲', desc: '朝一番の新鮮な香りを閉じ込めたコーヒー。一日の始まりを豊かに彩る特別な一杯を。', img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800' },
             { id: 2, cat: 2, label: 'LIVING', title: '今治産オーガニックタオル', desc: '使うほどに肌に馴染む、極上の柔らかさ。綿本来の良さを引き出した逸品。', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800' },
             { id: 3, cat: 1, label: 'GOURMET', title: '特選和牛のローストビーフ', desc: 'じっくりと低温調理で仕上げた、口の中でとろける贅沢な味わい。', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800' },
-            { id: 4, cat: 1, label: 'GOURMET', title: 'ふらの牛乳プリン(6本入)', desc: '新鮮な牛乳を贅沢に使用。口の中で優しくとろけるプリンです。', img: 'https://images.unsplash.com/photo-1581441712213-9118534062f6?w=800' }
+            { id: 4, cat: 1, label: 'GOURMET', title: 'ふらの牛乳プリン(6本入)', desc: '新鮮な牛乳を贅沢に使用。口の中で優しくとろけるプリンです。', img: 'https://images.unsplash.com/photo-1581441712213-9118534062f6?w=800' },
+            { id: 5, cat: 2, label: 'LIVING', title: '錫製タンブラー ペアセット', desc: '職人が一つひとつ丁寧に磨き上げた、冷たさが持続する錫製タンブラー。', img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800' }
         ];
 
         let cart = [];
         let favorites = [];
 
-        // Smooth Transition Login
         function checkPass() {
             const input = document.getElementById('passInput').value;
-            if(input === CONFIG.password) {
+            if(input === "2024") {
                 const overlay = document.getElementById('authOverlay');
                 const card = document.getElementById('authCard');
                 const app = document.getElementById('appContent');
                 
-                // Start exiting animation
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(-20px) scale(0.95)';
                 overlay.style.opacity = '0';
                 overlay.style.pointerEvents = 'none';
 
-                // Setup App
                 app.style.display = 'block';
                 build();
                 
                 setTimeout(() => {
                     overlay.style.display = 'none';
                     app.classList.add('visible');
+                    updateIndicator();
                 }, 400);
             } else {
                 document.getElementById('authError').classList.remove('hidden');
-                document.getElementById('passInput').value = '';
             }
         }
 
         function build() {
-            const grids = document.querySelectorAll('.card-grid');
-            grids.forEach(g => g.innerHTML = '');
             giftData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.innerHTML = `
-                    <div class="img-container">
-                        <img src="${item.img}" onclick="openModalById(${item.id})">
-                    </div>
-                    <div class="info-area" onclick="openModalById(${item.id})">
-                        <div class="cat-badge">${item.label}</div>
-                        <h3 class="item-title">${item.title}</h3>
-                    </div>
-                `;
-                grids[0].appendChild(card.cloneNode(true));
-                if (grids[item.cat]) grids[item.cat].appendChild(card);
-            });
-            updateIndicator();
-        }
-
-        // Cart & Dragging Logic (Fluid implementation)
-        function updateCartUI() {
-            const list = document.getElementById('cartItemsList');
-            document.getElementById('cartBadge').innerText = cart.length;
-            list.innerHTML = '';
-            const labels = ["第1希望", "第2希望", "第3希望"];
-
-            cart.forEach((item, i) => {
-                const slot = document.createElement('div');
-                slot.className = 'cart-slot';
-                slot.innerHTML = `
-                    <div class="rank-label-fixed">${labels[i]}</div>
-                    <div class="cart-slot-target">
-                        <div class="cart-item-wrapper" data-index="${i}" data-id="${item.id}" onpointerdown="handlePointerDown(event)">
-                            <div class="flex items-center gap-4 bg-white p-3 rounded-xl shadow-sm border border-stone-100 h-[74px]">
-                                <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
-                                <div class="flex-grow min-w-0">
-                                    <div class="text-[13px] font-bold truncate">${item.title}</div>
-                                </div>
-                                <div class="text-[10px] text-red-400 font-medium px-2 py-1 cursor-pointer" onclick="removeFromCart(${item.id})">削除</div>
-                            </div>
+                const cardHtml = `
+                    <div class="item-card" onclick="openModalById(${item.id})">
+                        <div class="img-container">
+                            <img src="${item.img}">
+                        </div>
+                        <div class="info-area">
+                            <div class="cat-badge">${item.label}</div>
+                            <h3 class="item-title">${item.title}</h3>
                         </div>
                     </div>
                 `;
-                list.appendChild(slot);
-            });
-            
-            const orderBtn = document.getElementById('orderBtn');
-            if(cart.length > 0) orderBtn.classList.remove('disabled');
-            else orderBtn.classList.add('disabled');
-        }
-
-        let activeEl = null, startY = 0, placeholderIdx = -1;
-
-        function handlePointerDown(e) {
-            if(e.target.innerText === '削除') return;
-            activeEl = e.currentTarget;
-            activeEl.setPointerCapture(e.pointerId);
-            startY = e.clientY;
-            placeholderIdx = parseInt(activeEl.dataset.index);
-            activeEl.classList.add('dragging');
-            activeEl.onpointermove = handlePointerMove;
-            activeEl.onpointerup = handlePointerUp;
-        }
-
-        function handlePointerMove(e) {
-            if(!activeEl) return;
-            const deltaY = e.clientY - startY;
-            activeEl.style.transform = `translateY(${deltaY}px)`;
-            
-            const targets = Array.from(document.querySelectorAll('.cart-slot-target'));
-            const activeCenter = activeEl.getBoundingClientRect().top + (activeEl.offsetHeight / 2);
-
-            targets.forEach((target, targetIdx) => {
-                if(targetIdx === placeholderIdx) return;
-                const targetRect = target.getBoundingClientRect();
-                const targetCenter = targetRect.top + (targetRect.height / 2);
-
-                if ((placeholderIdx < targetIdx && activeCenter > targetCenter) || (placeholderIdx > targetIdx && activeCenter < targetCenter)) {
-                    const item = cart.splice(placeholderIdx, 1)[0];
-                    cart.splice(targetIdx, 0, item);
-                    placeholderIdx = targetIdx;
-                    updateCartUIAnimate();
-                }
+                document.getElementById('grid-0').insertAdjacentHTML('beforeend', cardHtml);
+                const catGrid = document.getElementById(`grid-${item.cat}`);
+                if(catGrid) catGrid.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
 
-        function updateCartUIAnimate() {
-            const wrappers = Array.from(document.querySelectorAll('.cart-item-wrapper'));
-            wrappers.forEach(el => {
-                if(el === activeEl) return;
-                const curIdx = cart.findIndex(c => c.id == el.dataset.id);
-                const origIdx = parseInt(el.dataset.index);
-                el.classList.add('animating');
-                el.style.transform = `translateY(${(curIdx - origIdx) * 116}px)`;
-            });
-        }
-
-        function handlePointerUp(e) {
-            if(!activeEl) return;
-            activeEl.classList.remove('dragging');
-            updateCartUI();
-            activeEl = null;
-        }
-
-        // Standard UI Utils
         function openModalById(id) {
             const item = giftData.find(i => i.id === id);
+            const modal = document.getElementById('modal');
             document.getElementById('modalImg').src = item.img;
             document.getElementById('modalTitle').innerText = item.title;
             document.getElementById('modalDesc').innerText = item.desc;
-            document.getElementById('modal').style.display = 'flex';
-            setTimeout(() => document.getElementById('modal').classList.add('active'), 10);
+            document.getElementById('modalBadge').innerText = item.label;
+            
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+
+            // Fav State in Modal
+            const favBtn = document.getElementById('modalFavBtn');
+            const isFav = favorites.some(f => f.id === id);
+            favBtn.className = `btn-fav-detail ${isFav ? 'active' : ''}`;
+            favBtn.onclick = () => toggleFav(item);
+
             document.getElementById('addToCartBtn').onclick = () => {
-                if(!cart.some(c => c.id === item.id)) {
+                if(!cart.some(c => c.id === id)) {
                     cart.push(item);
-                    updateCartUI();
+                    updateStats();
                     closeModal();
                 }
             };
+        }
+
+        function toggleFav(item) {
+            const idx = favorites.findIndex(f => f.id === item.id);
+            if(idx > -1) favorites.splice(idx, 1);
+            else favorites.push(item);
+            
+            document.getElementById('modalFavBtn').className = `btn-fav-detail ${favorites.some(f => f.id === item.id) ? 'active' : ''}`;
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('cartBadge').innerText = cart.length;
+            document.getElementById('favBadge').innerText = favorites.length;
+            renderPanels();
+        }
+
+        function renderPanels() {
+            const cList = document.getElementById('cartItemsList');
+            const fList = document.getElementById('favItemsList');
+            
+            cList.innerHTML = cart.map(item => `<div class="bg-stone-50 p-3 rounded-lg mb-2 flex gap-3 items-center"><img src="${item.img}" class="w-10 h-10 object-cover rounded"><div class="text-xs font-bold">${item.title}</div></div>`).join('');
+            fList.innerHTML = favorites.map(item => `<div class="bg-stone-50 p-3 rounded-lg mb-2 flex gap-3 items-center"><img src="${item.img}" class="w-10 h-10 object-cover rounded"><div class="text-xs font-bold">${item.title}</div></div>`).join('');
         }
 
         function closeModal() {
@@ -474,22 +392,21 @@
             setTimeout(() => document.getElementById('modal').style.display = 'none', 400);
         }
 
-        function removeFromCart(id) {
-            cart = cart.filter(c => c.id !== id);
-            updateCartUI();
-        }
-
         function closePanel(id) {
-            const p = document.getElementById(id);
-            p.classList.remove('active');
-            setTimeout(() => p.style.display = 'none', 400);
+            document.getElementById(id).classList.remove('active');
+            setTimeout(() => document.getElementById(id).style.display = 'none', 400);
         }
 
         document.getElementById('cartTrigger').onclick = () => {
             const p = document.getElementById('cartPanel');
             p.style.display = 'flex';
             setTimeout(() => p.classList.add('active'), 10);
-            updateCartUI();
+        };
+
+        document.getElementById('favTrigger').onclick = () => {
+            const p = document.getElementById('favPanel');
+            p.style.display = 'flex';
+            setTimeout(() => p.classList.add('active'), 10);
         };
 
         const scroller = document.getElementById('mainScroller');
@@ -510,6 +427,8 @@
             tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
             updateIndicator();
         };
+
+        window.onresize = updateIndicator;
     </script>
 </body>
 </html>
